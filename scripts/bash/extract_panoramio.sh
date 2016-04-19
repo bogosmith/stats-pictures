@@ -52,26 +52,30 @@ maxlon=$(echo $lon+0.007 | bc)
 
 printf %f"\n"%f"\n"%f"\n"%f"\n" $minlat $maxlat $minlon $maxlon
 
-# mapfilter=true would remove many pictures for the purpose of not showing overlapping ones
-#wget -O ${outdir}/file1.json http://www.panoramio.com/map/get_panoramas.php?set=full\&from=0\&to=100\&minx=$minlon\&miny=$minlat\&maxx=$maxlon\&maxy=$maxlat\&size=original\&mapfilter=false 
-
-wget -O ${outdir}/initial.json http://www.panoramio.com/map/get_panoramas.php?set=full\&from=0\&to=0\&minx=$minlon\&miny=$minlat\&maxx=$maxlon\&maxy=$maxlat\&size=original\&mapfilter=false 
-# beautify
-cat ${outdir}/initial.json | python -m json.tool > ${outdir}/initial.pretty
-cnt=$(cat ${outdir}/initial.pretty | grep "\"count\":" | awk '{print $2}' | tr -d ',')
-#cnt=101
-pages=$((cnt/100))
-inexact=$((cnt%100!=0))
-echo $cnt
-echo $pages
-for i in $(seq 0 $((pages+inexact-1)));
+step=25
+count=0
+total_pics=0
+while true;
 do
-next=$(((i+1)*100))
-low_inclusive=$((i*100))
-high_exclusive=$((next<=cnt-1?next:cnt))
-echo $low_inclusive" -> "$high_exclusive
-wget -O ${outdir}/file$i.json http://www.panoramio.com/map/get_panoramas.php?set=full\&from=$low_inclusive\&to=$high_exclusive\&minx=$minlon\&miny=$minlat\&maxx=$maxlon\&maxy=$maxlat\&size=original\&mapfilter=false 
-cat ${outdir}/file$i.json | python -m json.tool > ${outdir}/file$i.pretty
-sleep $((RANDOM % 3))
+  low_inclusive=$((count*step))
+  high_exclusive=$(((count+1)*step))
+  wget -O ${outdir}/file$count.json http://www.panoramio.com/map/get_panoramas.php?set=full\&from=$low_inclusive\&to=$high_exclusive\&minx=$minlon\&miny=$minlat\&maxx=$maxlon\&maxy=$maxlat\&size=original\&mapfilter=false 
+  cat ${outdir}/file$count.json | python -m json.tool > ${outdir}/file$count.pretty
+  cnt=$(grep '"has_more": true,' ${outdir}/file$count.pretty | wc -l )
+  pics=$(grep ^[[:space:]]*\"height\": ${outdir}/file$count.pretty | wc -l)
+  total_pics=$((total_pics + pics))
+  if [ $cnt == 0 ]; then
+    break
+  fi
+  sleep $((RANDOM % 3))
+  count=$((count+1))
 done
 
+sum="Centre lat = "$lat"\n"
+sum=$sum"centre lon = "$lon"\n"
+sum=$sum"minlat = "$minlat"\n"
+sum=$sum"maxlat = "$maxlat"\n"
+sum=$sum"minlon = "$minlon"\n"
+sum=$sum"maxlon = "$maxlon"\n"
+sum=$sum"Total pics:"$total_pics
+printf "$sum" > ${outdir}/summary.txt

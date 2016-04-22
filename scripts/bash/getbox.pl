@@ -5,7 +5,7 @@ use constant PI => 4 *atan2(1,1);
 use Math::Trig;
 
 
-my $usage="<script_name> lat lon kms";
+my $usage="The script expects triples of the format <lat lon kms> at stdin.\n";
 
 # the result is y modulo x
 sub modulo_euclid {
@@ -52,6 +52,7 @@ while(<>) {
   my $lat = $toks[0];
   my $lon = $toks[1];
   my $kmside = $toks[2];
+  if (not defined $lat or not defined $lon or not defined $kmside) { die $usage; }
   die "Point too close to the 180-th degree meridian.", $lat, " ", $lon  unless (180 - abs($lon)) > rad_to_deg(km_to_rad($kmside/2));
   #my ($lat, $lon, $kmside) = @ARGV;
   my ($northlat, $northlon) = get_vertical_north_from(deg_to_rad($lat), deg_to_rad($lon), km_to_rad($kmside/2));
@@ -69,7 +70,6 @@ while(<>) {
 
 
 
-#if (not defined $lat or not defined $lon) { die $usage; }
 #print "\n", $lat, " ", $lon," ", modulo_euclid($lat, $lon), "\n";
 #modulo_euclid($lat, $lon);
 

@@ -59,7 +59,7 @@ while(<>) {
   my ($minlat, $minlon) = get_horizontal_west_from($southlat, $southlon, km_to_rad($kmside/2));
   my ($maxlat, $maxlon) = get_horizontal_west_from($northlat, $northlon, -km_to_rad($kmside/2));
 
-  print rad_to_deg($minlon), " ", rad_to_deg($minlat), " ", rad_to_deg($maxlon), " ", rad_to_deg($maxlat);
+  print rad_to_deg($minlon), " ", rad_to_deg($minlat), " ", rad_to_deg($maxlon), " ", rad_to_deg($maxlat), "\n";
   #print $_;
 }
 #print $newlat, " ", $newlon, "\n";

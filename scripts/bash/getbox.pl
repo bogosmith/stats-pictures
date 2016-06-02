@@ -57,9 +57,15 @@ while(<>) {
   #my ($lat, $lon, $kmside) = @ARGV;
   my ($northlat, $northlon) = get_vertical_north_from(deg_to_rad($lat), deg_to_rad($lon), km_to_rad($kmside/2));
   my ($southlat, $southlon) = get_vertical_north_from(deg_to_rad($lat), deg_to_rad($lon), -km_to_rad($kmside/2));
-  my ($minlat, $minlon) = get_horizontal_west_from($southlat, $southlon, km_to_rad($kmside/2));
-  my ($maxlat, $maxlon) = get_horizontal_west_from($northlat, $northlon, -km_to_rad($kmside/2));
+ 
+# Since the trapezoid-like figure can be more squeezed as one goes towards the poles we take the average between the longitudes of the northwest and southwest corners and also the average between the longitudes of the norteast and southeast corners for a modified figure.  
+  my ($minlat, $southminlon) = get_horizontal_west_from($southlat, $southlon, km_to_rad($kmside/2));
+  my ($minlat_dummy, $southmaxlon) = get_horizontal_west_from($southlat, $southlon, -km_to_rad($kmside/2));
+  my ($maxlat, $northminlon) = get_horizontal_west_from($northlat, $northlon, km_to_rad($kmside/2));
+  my ($maxlat_dummy, $northmaxlon) = get_horizontal_west_from($northlat, $northlon, -km_to_rad($kmside/2));
 
+  my $minlon = ($northminlon + $southminlon)/2;
+  my $maxlon = ($northmaxlon + $southmaxlon)/2;
   print rad_to_deg($minlon), " ", rad_to_deg($minlat), " ", rad_to_deg($maxlon), " ", rad_to_deg($maxlat), "\n";
   #print $_;
 }

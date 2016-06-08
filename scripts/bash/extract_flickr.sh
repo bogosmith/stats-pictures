@@ -73,9 +73,9 @@ if [ "$(ls -A $outdir)" ]; then
 fi
 
 box_script=$(dirname $(cd "$( dirname "$0" )" && pwd))/perl/getbox.pl
-echo $lat
-echo $lon
-echo $bbox_side
+#echo $lat
+#echo $lon
+#echo $bbox_side
 bounds=($(echo "$lat" "$lon" "$bbox_side" | perl "$box_script"))
 minlon=${bounds[0]}
 minlat=${bounds[1]}

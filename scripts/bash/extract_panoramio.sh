@@ -1,13 +1,16 @@
 #!/bin/bash
 
-usage() { echo "Usage: $0 -o <output_dir> -a <latitude> -g <longitude>" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -o <output_dir> -a <latitude> -g <longitude> (-d <bounding_box_side_in_kilometers>)" 1>&2; exit 1; }
 nodir() { echo "Output directory has to exist." 1>&2; exit 1; }
 dirnotempty() { echo "Output directory has to be empty." 1>&2; exit 1; }
 datefull() { echo "Today's directory exists. Quitting.." 1>&2; exit 1; }
 
 
-while getopts ":o:a:g:" o; do
+while getopts ":o:a:g:d:" o; do
     case "${o}" in
+       d) 
+          bbox_side="${OPTARG}"
+          ;;
        o) 
           outdir=${OPTARG}
           ;;
@@ -24,6 +27,9 @@ while getopts ":o:a:g:" o; do
 done	
 shift $((OPTIND-1))
 # $1 now references the first non-option argument supplied to the script
+if [ -z "${bbox_side}" ]; then
+  bbox_side="2"
+fi
 
 if [ -z "${outdir}" ]; then
   usage
@@ -45,13 +51,19 @@ if [ "$(ls -A $outdir)" ]; then
   dirnotempty
 fi
 
-minlat=$(echo $lat-0.0045 | bc)
-maxlat=$(echo $lat+0.0045 | bc)
-minlon=$(echo $lon-0.007 | bc)
-maxlon=$(echo $lon+0.007 | bc)
+box_script=$(dirname $(cd "$( dirname "$0" )" && pwd))/perl/getbox.pl
+
+bounds=($(echo "$lat" "$lon" "$bbox_side" | perl "$box_script"))
+minlon=${bounds[0]}
+minlat=${bounds[1]}
+maxlon=${bounds[2]}
+maxlat=${bounds[3]}
+#minlat=$(echo $lat-0.0045 | bc)
+#maxlat=$(echo $lat+0.0045 | bc)
+#minlon=$(echo $lon-0.007 | bc)
+#maxlon=$(echo $lon+0.007 | bc)
 
 printf %f"\n"%f"\n"%f"\n"%f"\n" $minlat $maxlat $minlon $maxlon
-
 step=25
 count=0
 total_pics=0

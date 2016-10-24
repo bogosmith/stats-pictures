@@ -17,10 +17,10 @@ while getopts ":o:i:s:e:f:d:" o; do
           outdir="${OPTARG}"
           ;;
        s) 
-          strt="${OPTARG}"
+          start_date="${OPTARG}"
           ;;
        e) 
-          end="${OPTARG}"
+          end_date="${OPTARG}"
           ;;
        f) 
           freq="${OPTARG}"
@@ -44,11 +44,11 @@ if [ -z "${outdir}" ]; then
   usage
 fi
 
-if [ -z "${strt}" ]; then
+if [ -z "${start_date}" ]; then
   usage
 fi
 
-if [ -z "${end}" ]; then
+if [ -z "${end_date}" ]; then
   usage
 fi
 
@@ -82,4 +82,10 @@ do
   id=${toks[0]}
   lat=${toks[1]}
   lon=${toks[2]}
+  dir_for_point=$outdir/$id
+  mkdir $dir_for_point 
+  cmd="bash $extract_script -o $dir_for_point -a $lat -g $lon -s $start_date -e $end_date -d $bbox_side -f $freq"
+  echo $cmd
+  $cmd 
+  exit 1;
 done
